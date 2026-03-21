@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "omada": {
+      "command": "node",
+      "args": [
+        "/Users/edgardcontente/.local/share/pnpm/global/5/.pnpm/tplink-omada-mcp@https+++codeload.github.com+realtydev+omada-mcp+tar.gz+376e242cfa1c8f95ac4ca09ad655456f703fe345/node_modules/tplink-omada-mcp/dist/index.js"
+      ],
+      "env": {
+        "OMADA_URL": "https://omada.saltengenharia.com.br:8043",
+        "OMADA_USERNAME": "admin",
+        "OMADA_PASSWORD": "REPLACE_ME",
+        "OMADA_SITE": "Default"
+      }
+    }
+  }
+}

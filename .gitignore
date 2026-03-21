@@ -1,0 +1,32 @@
+.DS_Store
+
+# Local Codex / workspace artifacts
+.superpowers/
+recovery/
+
+# Generated WireGuard / Omada outputs and backups
+wireguard-output/
+
+# Out-of-scope prototypes kept locally
+ups-monitor-prototype/
+savant-profile-builder/
+arcam_st60.fixed.xml
+
+# Local secrets / environment overrides
+.env
+.env.*
+*.local
+*.local.json
+*.secret
+
+# Node / logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Misc temporary files
+*.pid
+*.tmp
+*.swp
