@@ -43,10 +43,19 @@ model CommercialItem {
   id            String             @id @default(cuid())
   code          String             @unique
   name          String
-  description   String?
   category      String
+  subcategory   String             @default("Geral")
   type          String
-  unitPrice     Float
+  unit          String             @default("UN")
+  baseCost      Float              @default(0)
+  referencePrice Float             @default(0)
+  commercialDescription String     @default("")
+  operationalDescription String?
+  manufacturer  String?
+  model         String?
+  sku           String?            @unique
+  ean           String?
+  imageUrl      String?
   active        Boolean            @default(true)
   createdById   String
   updatedById   String

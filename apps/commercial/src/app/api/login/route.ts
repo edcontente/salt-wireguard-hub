@@ -29,7 +29,8 @@ export async function POST(request: Request) {
     email: user.email,
     name: user.name,
     profileSlug: user.profile.slug,
-    maxFinalPriceAdjustment: user.profile.maxFinalPriceAdjustment
+    maxFinalPriceAdjustment: user.profile.maxFinalPriceAdjustment,
+    canManageCatalog: user.profile.canManageCatalog
   };
   await session.save();
 
