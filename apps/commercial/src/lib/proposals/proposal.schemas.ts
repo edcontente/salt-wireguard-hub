@@ -4,7 +4,7 @@ export const proposalStatusSchema = z.enum([
   "DRAFT",
   "SENT",
   "APPROVED",
-  "REJECTED",
+  "LOST",
   "ARCHIVED"
 ]);
 
@@ -17,9 +17,12 @@ export const proposalVersionStatusSchema = z.enum([
 export const proposalAuditActionSchema = z.enum([
   "CREATED",
   "UPDATED",
-  "VERSION_PUBLISHED",
-  "PUBLIC_LINK_CREATED",
-  "PUBLIC_LINK_REVOKED"
+  "SECTION_ADDED",
+  "ITEM_ADDED",
+  "VERSION_SENT",
+  "REVISION_CREATED",
+  "APPROVED",
+  "LOST"
 ]);
 
 export const proposalSectionSchema = z.object({
@@ -53,7 +56,7 @@ export const proposalSchema = z.object({
   customerName: z.string().min(1),
   customerEmail: z.string().email().nullish(),
   status: proposalStatusSchema,
-  currentRevision: z.number().int().positive(),
+  currentRevision: z.number().int().nonnegative(),
   createdById: z.string().cuid(),
   updatedById: z.string().cuid(),
   createdAt: z.date(),
