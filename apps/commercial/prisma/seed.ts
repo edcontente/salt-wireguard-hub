@@ -1,9 +1,11 @@
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "@prisma/client";
 
+const databaseUrl = `file:${process.cwd()}/dev.db`;
+
 const prisma = new PrismaClient({
   adapter: new PrismaBetterSqlite3({
-    url: "file:./dev.db"
+    url: databaseUrl
   })
 });
 
@@ -63,23 +65,6 @@ async function main() {
       email: "admin@commercial.local",
       passwordHash: "$2b$12$commercial.seed.password.hash.placeholder",
       profileId: adminProfile.id,
-      status: "ACTIVE"
-    }
-  });
-
-  await prisma.user.upsert({
-    where: { email: "vendedor@commercial.local" },
-    update: {
-      name: "Vendedor Comercial",
-      passwordHash: "$2b$12$commercial.seed.password.hash.placeholder",
-      profileId: sellerProfile.id,
-      status: "ACTIVE"
-    },
-    create: {
-      name: "Vendedor Comercial",
-      email: "vendedor@commercial.local",
-      passwordHash: "$2b$12$commercial.seed.password.hash.placeholder",
-      profileId: sellerProfile.id,
       status: "ACTIVE"
     }
   });
