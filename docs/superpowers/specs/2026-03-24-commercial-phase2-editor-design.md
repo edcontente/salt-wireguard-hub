@@ -17,9 +17,9 @@ Entra nesta fase:
 - reordenacao de ambientes e itens com `drag-and-drop`
 - botoes de `subir/descer` como apoio
 - remocao de ambiente e item com confirmacao
-- alerta visual de alcada antes do submit
+- alerta visual de alcada antes do `Salvar alteracoes` do item
 - bloqueio de navegacao entre itens quando houver alteracao nao salva
-- carga de `10 linhas` da planilha `produto 24032026.xlsx` como massa de teste
+- carga de `10 linhas` de uma planilha de produtos fornecida pelo usuario como massa de teste
 
 Nao entra nesta fase:
 - tela definitiva de importacao de planilha
@@ -148,6 +148,8 @@ Os itens dentro do ambiente devem poder ser reordenados por:
 - `drag-and-drop`
 - botoes `subir` e `descer`
 
+Este reorder de itens acontece apenas dentro do ambiente atual nesta fase.
+
 A reordenacao afeta apenas a ordem visual/comercial da versao em edicao.
 
 Persistencia esperada:
@@ -159,7 +161,7 @@ Nada disso pode modificar versao `LOCKED`.
 
 ### 7. Pricing and Approval Limits
 
-O sistema deve manter a validacao final ja existente no backend, mas passa a ter tambem uma camada visual antes do submit.
+O sistema deve manter a validacao final ja existente no backend, mas passa a ter tambem uma camada visual antes do `Salvar alteracoes` do item.
 
 Comportamento esperado:
 - ao editar o preco, o painel lateral compara com o preco de referencia do item
@@ -203,8 +205,10 @@ Ambientes e itens ja possuem `position`. Esta fase reforca seu uso para:
 
 ### Test Data
 
-Usaremos `10 linhas` da planilha:
-- `/Users/edgardcontente/Library/Mobile Documents/com~apple~CloudDocs/Downloads/produto 24032026.xlsx`
+Usaremos `10 linhas` de uma planilha de produtos fornecida pelo usuario para desenvolvimento local.
+
+Referencia atual de trabalho:
+- `produto 24032026.xlsx`
 
 Objetivo:
 - popular ambiente de desenvolvimento
