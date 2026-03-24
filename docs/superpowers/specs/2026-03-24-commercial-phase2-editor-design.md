@@ -100,6 +100,11 @@ o sistema deve interromper a acao e exigir uma decisao:
 
 Esta regra existe para evitar perda silenciosa de edicoes comerciais.
 
+Precedencia esperada:
+- alteracoes do painel lateral participam do estado de mudanca nao salva
+- `reorder` e `remove` aplicam imediatamente e nao entram em um estado de rascunho separado
+- se houver mudanca nao salva no painel lateral e o usuario tentar `reorder`, `remove` ou trocar o item por outro do catalogo, o sistema deve interromper e exigir `salvar` ou `descartar` antes de continuar
+
 ### 4. Replace Product or Service
 
 O item da proposta pode ser trocado por outro item do catalogo a partir do painel lateral.
@@ -107,8 +112,10 @@ O item da proposta pode ser trocado por outro item do catalogo a partir do paine
 Comportamento esperado:
 - o usuario escolhe outro item do catalogo
 - o sistema atualiza o vinculo comercial do item da proposta
-- o nome e a referencia comercial acompanham o item escolhido
-- descricao e observacoes podem ser ajustadas manualmente antes de salvar
+- o sistema substitui integralmente o item atual pelos dados comerciais do novo item
+- isso inclui nome, foto principal, descricao comercial padrao e valor do novo produto/servico
+- a troca nao preserva descricao, observacoes ou valor do item anterior
+- depois da troca, o usuario pode ajustar novamente os campos e salvar manualmente
 - a troca respeita a alcada e a regra de versao em edicao
 
 Nao e necessario, nesta fase, criar historico detalhado de comparacao entre item antigo e novo.
@@ -119,6 +126,11 @@ Ao remover um item ou ambiente:
 - o sistema sempre pede confirmacao
 - o ambiente removido leva seus itens junto
 - nao existe lixeira nesta fase
+- a remocao aplica imediatamente apos a confirmacao
+
+Comportamento esperado apos remocao:
+- se um item for removido, o sistema seleciona automaticamente o proximo item disponivel; se nao houver proximo, pode selecionar o anterior
+- se um ambiente for removido, o painel lateral fecha e nenhum item permanece selecionado
 
 Mensagens de confirmacao devem ser claras o suficiente para evitar acao acidental.
 
@@ -138,6 +150,11 @@ Os itens dentro do ambiente devem poder ser reordenados por:
 
 A reordenacao afeta apenas a ordem visual/comercial da versao em edicao.
 
+Persistencia esperada:
+- a reordenacao aplica imediatamente
+- ela nao depende de um `Salvar alteracoes` geral da proposta
+- se houver alteracao nao salva no painel lateral, a reordenacao deve ser bloqueada ate o usuario decidir `salvar` ou `descartar`
+
 Nada disso pode modificar versao `LOCKED`.
 
 ### 7. Pricing and Approval Limits
@@ -147,6 +164,7 @@ O sistema deve manter a validacao final ja existente no backend, mas passa a ter
 Comportamento esperado:
 - ao editar o preco, o painel lateral compara com o preco de referencia do item
 - se houver ajuste acima da alcada do perfil, o sistema sinaliza visualmente
+- o ponto de bloqueio desta fase e o `Salvar alteracoes` do item
 - o botao `Salvar alteracoes` fica bloqueado enquanto a regra estiver invalida
 - o backend continua validando para impedir bypass
 
@@ -193,6 +211,8 @@ Objetivo:
 - validar o editor com dados proximos da operacao real
 
 Esta carga e temporaria e serve apenas como massa de teste.
+
+Para fins de planejamento, pode ser assumido um caminho de desenvolvimento local para a planilha, sem transformar esse caminho absoluto em dependencia do produto final.
 
 ## Technical Design
 
