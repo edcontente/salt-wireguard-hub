@@ -1,8 +1,11 @@
 import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../src/lib/auth/password";
 
 const prisma = new PrismaClient();
 
 async function main() {
+  const adminPasswordHash = await hashPassword("admin123456");
+
   const adminProfile = await prisma.commercialProfile.upsert({
     where: { slug: "admin_comercial" },
     update: {
@@ -49,14 +52,14 @@ async function main() {
     where: { email: "admin@commercial.local" },
     update: {
       name: "Admin Comercial",
-      passwordHash: "$2b$12$commercial.seed.password.hash.placeholder",
+      passwordHash: adminPasswordHash,
       profileId: adminProfile.id,
       status: "ACTIVE"
     },
     create: {
       name: "Admin Comercial",
       email: "admin@commercial.local",
-      passwordHash: "$2b$12$commercial.seed.password.hash.placeholder",
+      passwordHash: adminPasswordHash,
       profileId: adminProfile.id,
       status: "ACTIVE"
     }
