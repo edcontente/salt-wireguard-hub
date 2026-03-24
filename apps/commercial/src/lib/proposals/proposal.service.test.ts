@@ -225,10 +225,39 @@ describe("proposal service", () => {
       actor.id
     );
 
+    await sendProposalVersion(approved.id, actor.id);
+    await sendProposalVersion(lost.id, actor.id);
+
     const approvedProposal = await markProposalAsApproved(approved.id, actor.id);
     const lostProposal = await markProposalAsLost(lost.id, actor.id);
 
     expect(approvedProposal.status).toBe("APPROVED");
     expect(lostProposal.status).toBe("LOST");
+  });
+
+  it("blocks approval, loss, and revision when lifecycle transitions are invalid", async () => {
+    const actor = await ensureProposalActor();
+    const draft = await createDraftProposal(
+      {
+        number: `${TEST_PROPOSAL_PREFIX}-006`,
+        title: "Projeto em rascunho",
+        customerName: "Cliente Teste"
+      },
+      actor.id
+    );
+
+    await expect(markProposalAsApproved(draft.id, actor.id)).rejects.toThrow("enviada");
+    await expect(markProposalAsLost(draft.id, actor.id)).rejects.toThrow("enviada");
+
+    await expect(
+      createRevisionFromCurrentVersion(draft.id, actor.id)
+    ).rejects.toThrow("enviada");
+
+    await sendProposalVersion(draft.id, actor.id);
+    await markProposalAsApproved(draft.id, actor.id);
+
+    await expect(
+      createRevisionFromCurrentVersion(draft.id, actor.id)
+    ).rejects.toThrow("finalizada");
   });
 });

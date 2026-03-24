@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ProposalPublicView } from "@/components/proposal-public-view";
-import { getPublicProposalPresentationByToken } from "@/lib/proposals/proposal-presenter";
+import { getProposalPresentationByPublicShare } from "@/lib/proposals/proposal-presenter";
 
 type PublicProposalPageProps = {
   params: Promise<{
@@ -14,7 +14,7 @@ export default async function PublicProposalPage({
   const { publicToken } = await params;
 
   try {
-    const proposal = await getPublicProposalPresentationByToken(publicToken);
+    const proposal = await getProposalPresentationByPublicShare(publicToken);
 
     return <ProposalPublicView proposal={proposal} />;
   } catch {

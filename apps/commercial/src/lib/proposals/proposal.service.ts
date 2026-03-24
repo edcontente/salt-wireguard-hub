@@ -316,6 +316,14 @@ export async function createRevisionFromCurrentVersion(
       throw new Error("Proposta nao encontrada.");
     }
 
+    if (proposal.status === "APPROVED" || proposal.status === "LOST") {
+      throw new Error("A proposta ja foi finalizada e nao pode receber nova revisao.");
+    }
+
+    if (proposal.status !== "SENT") {
+      throw new Error("A revisao so pode ser criada a partir de uma proposta enviada.");
+    }
+
     const sourceVersion = await tx.proposalVersion.findFirst({
       where: {
         proposalId,
@@ -402,6 +410,18 @@ export async function markProposalAsApproved(
   proposalId: string,
   actorUserId: string
 ) {
+  const existingProposal = await db.proposal.findUnique({
+    where: { id: proposalId }
+  });
+
+  if (!existingProposal) {
+    throw new Error("Proposta nao encontrada.");
+  }
+
+  if (existingProposal.status !== "SENT") {
+    throw new Error("A proposta precisa estar enviada antes de ser aprovada.");
+  }
+
   const proposal = await db.proposal.update({
     where: { id: proposalId },
     data: {
@@ -424,6 +444,18 @@ export async function markProposalAsLost(
   proposalId: string,
   actorUserId: string
 ) {
+  const existingProposal = await db.proposal.findUnique({
+    where: { id: proposalId }
+  });
+
+  if (!existingProposal) {
+    throw new Error("Proposta nao encontrada.");
+  }
+
+  if (existingProposal.status !== "SENT") {
+    throw new Error("A proposta precisa estar enviada antes de ser marcada como perdida.");
+  }
+
   const proposal = await db.proposal.update({
     where: { id: proposalId },
     data: {

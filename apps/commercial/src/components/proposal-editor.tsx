@@ -40,6 +40,8 @@ export function ProposalEditor({
   showPurchaseOrderPrompt
 }: ProposalEditorProps) {
   const editable = proposal.versionStatus === "DRAFT";
+  const canReviewDecision = proposal.status === "SENT";
+  const canCreateRevision = !editable && proposal.status === "SENT";
 
   return (
     <section>
@@ -60,17 +62,21 @@ export function ProposalEditor({
           <form action={sendVersionAction}>
             <button type="submit">Enviar versao</button>
           </form>
-        ) : (
+        ) : canCreateRevision ? (
           <form action={createRevisionAction}>
             <button type="submit">Criar revisao</button>
           </form>
-        )}
-        <form action={approveAction}>
-          <button type="submit">Marcar como aprovada</button>
-        </form>
-        <form action={loseAction}>
-          <button type="submit">Marcar como perdida</button>
-        </form>
+        ) : null}
+        {canReviewDecision ? (
+          <form action={approveAction}>
+            <button type="submit">Marcar como aprovada</button>
+          </form>
+        ) : null}
+        {canReviewDecision ? (
+          <form action={loseAction}>
+            <button type="submit">Marcar como perdida</button>
+          </form>
+        ) : null}
         {proposal.publicSharePath ? (
           <a href={proposal.publicSharePath} target="_blank" rel="noreferrer">
             Abrir link publico

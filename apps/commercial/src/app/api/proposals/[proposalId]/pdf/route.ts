@@ -1,6 +1,6 @@
 import { renderToBuffer } from "@react-pdf/renderer";
 import { ProposalDocument } from "@/components/pdf/proposal-document";
-import { getProposalPresentationByProposalId } from "@/lib/proposals/proposal-presenter";
+import { getProposalPresentationForPdf } from "@/lib/proposals/proposal-presenter";
 
 type ProposalPdfRouteProps = {
   params: Promise<{
@@ -9,13 +9,19 @@ type ProposalPdfRouteProps = {
 };
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: ProposalPdfRouteProps
 ) {
   const { proposalId } = await params;
+  const url = new URL(request.url);
+  const token = url.searchParams.get("token");
 
   try {
-    const proposal = await getProposalPresentationByProposalId(proposalId);
+    if (!token) {
+      throw new Error("Link publico invalido ou expirado.");
+    }
+
+    const proposal = await getProposalPresentationForPdf(proposalId, token);
     const pdfBuffer = await renderToBuffer(ProposalDocument({ proposal }));
 
     return new Response(new Uint8Array(pdfBuffer), {

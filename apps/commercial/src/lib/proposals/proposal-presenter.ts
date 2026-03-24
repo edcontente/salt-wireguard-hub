@@ -69,6 +69,48 @@ async function getLockedVersionByProposalId(proposalId: string) {
   });
 }
 
+async function getActivePublicLinkByToken(token: string) {
+  const publicLink = await db.proposalPublicLink.findUnique({
+    where: { token },
+    include: {
+      proposalVersion: {
+        include: {
+          proposal: true,
+          sections: {
+            orderBy: {
+              position: "asc"
+            },
+            include: {
+              items: {
+                orderBy: {
+                  position: "asc"
+                },
+                include: {
+                  commercialItem: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (
+    !publicLink ||
+    publicLink.revokedAt ||
+    (publicLink.expiresAt && publicLink.expiresAt <= new Date())
+  ) {
+    throw new Error("Link publico invalido ou expirado.");
+  }
+
+  if (publicLink.proposalVersion.status !== "LOCKED") {
+    throw new Error("Versao enviada nao encontrada.");
+  }
+
+  return publicLink;
+}
+
 type ProposalPresentationVersion = {
   label: string;
   proposal: {
@@ -170,42 +212,10 @@ export async function getProposalPresentationByProposalId(
   return presentProposalVersion(version);
 }
 
-export async function getPublicProposalPresentationByToken(
+export async function getProposalPresentationByPublicShare(
   token: string
 ): Promise<ProposalPresentationViewModel> {
-  const publicLink = await db.proposalPublicLink.findUnique({
-    where: { token },
-    include: {
-      proposalVersion: {
-        include: {
-          proposal: true,
-          sections: {
-            orderBy: {
-              position: "asc"
-            },
-            include: {
-              items: {
-                orderBy: {
-                  position: "asc"
-                },
-                include: {
-                  commercialItem: true
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  });
-
-  if (
-    !publicLink ||
-    publicLink.revokedAt ||
-    (publicLink.expiresAt && publicLink.expiresAt <= new Date())
-  ) {
-    throw new Error("Link publico invalido ou expirado.");
-  }
+  const publicLink = await getActivePublicLinkByToken(token);
 
   await db.proposalPublicLink.update({
     where: { id: publicLink.id },
@@ -215,6 +225,19 @@ export async function getPublicProposalPresentationByToken(
       }
     }
   });
+
+  return presentProposalVersion(publicLink.proposalVersion);
+}
+
+export async function getProposalPresentationForPdf(
+  proposalId: string,
+  token: string
+): Promise<ProposalPresentationViewModel> {
+  const publicLink = await getActivePublicLinkByToken(token);
+
+  if (publicLink.proposalVersion.proposalId !== proposalId) {
+    throw new Error("Link publico invalido ou expirado.");
+  }
 
   return presentProposalVersion(publicLink.proposalVersion);
 }
@@ -233,6 +256,8 @@ export async function getLatestProposalSharePaths(proposalId: string) {
 
   return {
     publicSharePath: publicLink ? `/p/${publicLink.token}` : null,
-    pdfPath: `/api/proposals/${proposalId}/pdf`
+    pdfPath: publicLink
+      ? `/api/proposals/${proposalId}/pdf?token=${publicLink.token}`
+      : null
   };
 }

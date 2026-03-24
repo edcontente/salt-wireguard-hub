@@ -153,7 +153,14 @@ export async function createProposalRevisionAction(proposalId: string) {
 export async function approveProposalAction(proposalId: string) {
   const user = await requireProposalManager();
 
-  await markProposalAsApproved(proposalId, user.id);
+  try {
+    await markProposalAsApproved(proposalId, user.id);
+  } catch (error) {
+    redirectToProposal(
+      proposalId,
+      error instanceof Error ? error.message : "Nao foi possivel aprovar a proposta."
+    );
+  }
 
   revalidatePath(`/propostas/${proposalId}`);
   revalidatePath("/propostas");
@@ -163,7 +170,16 @@ export async function approveProposalAction(proposalId: string) {
 export async function loseProposalAction(proposalId: string) {
   const user = await requireProposalManager();
 
-  await markProposalAsLost(proposalId, user.id);
+  try {
+    await markProposalAsLost(proposalId, user.id);
+  } catch (error) {
+    redirectToProposal(
+      proposalId,
+      error instanceof Error
+        ? error.message
+        : "Nao foi possivel marcar a proposta como perdida."
+    );
+  }
 
   revalidatePath(`/propostas/${proposalId}`);
   revalidatePath("/propostas");
