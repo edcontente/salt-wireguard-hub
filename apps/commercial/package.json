@@ -1,0 +1,40 @@
+{
+  "name": "commercial",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "test": "vitest run",
+    "lint": "eslint . --max-warnings=0",
+    "db:prepare": "node -e \"const fs=require('fs'); fs.mkdirSync('prisma',{recursive:true}); fs.closeSync(fs.openSync('prisma/dev.db','a'));\"",
+    "postinstall": "npm run db:prepare"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@react-pdf/renderer": "^4.3.2",
+    "argon2": "^0.44.0",
+    "iron-session": "^8.0.4",
+    "next": "^15.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^16.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.0.0",
+    "jsdom": "^25.0.0",
+    "prisma": "^5.22.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}
