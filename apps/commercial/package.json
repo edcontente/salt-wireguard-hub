@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@react-pdf/renderer": "^4.3.2",
     "argon2": "^0.44.0",
     "iron-session": "^8.0.4",
     "next": "^15.0.0",

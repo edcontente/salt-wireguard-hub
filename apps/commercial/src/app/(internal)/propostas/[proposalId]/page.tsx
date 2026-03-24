@@ -41,6 +41,7 @@ export default async function ProposalPage({
     typeof resolvedSearchParams?.error === "string"
       ? decodeURIComponent(resolvedSearchParams.error)
       : undefined;
+  const showPurchaseOrderPrompt = resolvedSearchParams?.purchasePrompt === "1";
 
   return (
     <ProposalEditor
@@ -57,6 +58,7 @@ export default async function ProposalPage({
       approveAction={approveProposalAction.bind(null, proposal.id)}
       loseAction={loseProposalAction.bind(null, proposal.id)}
       errorMessage={errorParam}
+      showPurchaseOrderPrompt={showPurchaseOrderPrompt}
     />
   );
 }

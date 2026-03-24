@@ -24,6 +24,7 @@ type ProposalEditorProps = {
   approveAction: ProposalFormAction;
   loseAction: ProposalFormAction;
   errorMessage?: string;
+  showPurchaseOrderPrompt?: boolean;
 };
 
 export function ProposalEditor({
@@ -35,7 +36,8 @@ export function ProposalEditor({
   createRevisionAction,
   approveAction,
   loseAction,
-  errorMessage
+  errorMessage,
+  showPurchaseOrderPrompt
 }: ProposalEditorProps) {
   const editable = proposal.versionStatus === "DRAFT";
 
@@ -69,7 +71,22 @@ export function ProposalEditor({
         <form action={loseAction}>
           <button type="submit">Marcar como perdida</button>
         </form>
+        {proposal.publicSharePath ? (
+          <a href={proposal.publicSharePath} target="_blank" rel="noreferrer">
+            Abrir link publico
+          </a>
+        ) : null}
+        {proposal.pdfPath ? (
+          <a href={proposal.pdfPath} target="_blank" rel="noreferrer">
+            Abrir PDF
+          </a>
+        ) : null}
       </div>
+      {showPurchaseOrderPrompt ? (
+        <p>
+          Proposta aprovada. Deseja iniciar um pedido de compra para o fornecedor?
+        </p>
+      ) : null}
       <form action={addSectionAction}>
         <fieldset disabled={!editable}>
           <legend>Adicionar ambiente</legend>

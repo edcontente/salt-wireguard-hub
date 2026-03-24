@@ -17,6 +17,7 @@ import {
   proposalStatusSchema,
   proposalVersionStatusSchema
 } from "./proposal.schemas";
+import { getLatestProposalSharePaths } from "./proposal-presenter";
 
 type CreateDraftProposalInput = {
   number: string;
@@ -589,6 +590,7 @@ export async function getProposalEditorData(
       }))
     }))
   );
+  const sharePaths = await getLatestProposalSharePaths(proposalId);
 
   return {
     id: proposal.id,
@@ -602,6 +604,8 @@ export async function getProposalEditorData(
     total,
     maxFinalPriceAdjustment,
     currentVersionId: currentVersion.id,
+    publicSharePath: sharePaths.publicSharePath,
+    pdfPath: sharePaths.pdfPath,
     sections: currentVersion.sections.map((section) => ({
       id: section.id,
       title: section.title,

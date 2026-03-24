@@ -35,6 +35,8 @@ export type ProposalEditorViewModel = {
   total: number;
   maxFinalPriceAdjustment: number;
   currentVersionId: string;
+  publicSharePath?: string | null;
+  pdfPath?: string | null;
   sections: ProposalEditorSectionViewModel[];
 };
 
@@ -59,3 +61,31 @@ export type ProposalSummaryViewModel = {
 export type ProposalFormAction =
   | ((formData: FormData) => Promise<void>)
   | string;
+
+export type ProposalPresentationItemViewModel = {
+  id: string;
+  typeLabel: string;
+  name: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+};
+
+export type ProposalPresentationSectionViewModel = {
+  id: string;
+  title: string;
+  items: ProposalPresentationItemViewModel[];
+  totalPrice: number;
+};
+
+export type ProposalPresentationViewModel = {
+  number: string;
+  versionLabel: string;
+  title: string;
+  customerName: string;
+  intro: string;
+  sections: ProposalPresentationSectionViewModel[];
+  totalPrice: number;
+};

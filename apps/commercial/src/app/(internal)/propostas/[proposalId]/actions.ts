@@ -11,6 +11,7 @@ import {
   markProposalAsLost,
   sendProposalVersion
 } from "@/lib/proposals/proposal.service";
+import { ensureProposalPublicLinkForProposal } from "@/lib/proposals/proposal-presenter";
 
 function readOptionalField(formData: FormData, fieldName: string) {
   const value = formData.get(fieldName);
@@ -119,6 +120,7 @@ export async function sendProposalVersionAction(proposalId: string) {
 
   try {
     await sendProposalVersion(proposalId, user.id);
+    await ensureProposalPublicLinkForProposal(proposalId);
   } catch (error) {
     redirectToProposal(
       proposalId,
@@ -155,7 +157,7 @@ export async function approveProposalAction(proposalId: string) {
 
   revalidatePath(`/propostas/${proposalId}`);
   revalidatePath("/propostas");
-  redirectToProposal(proposalId);
+  redirect(`/propostas/${proposalId}?purchasePrompt=1`);
 }
 
 export async function loseProposalAction(proposalId: string) {

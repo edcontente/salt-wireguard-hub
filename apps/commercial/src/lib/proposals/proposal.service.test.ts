@@ -186,8 +186,12 @@ describe("proposal service", () => {
     );
 
     const sentVersion = await sendProposalVersion(proposal.id, actor.id);
+    const sentProposal = await db.proposal.findUniqueOrThrow({
+      where: { id: proposal.id }
+    });
 
     expect(sentVersion.status).toBe("LOCKED");
+    expect(sentProposal.status).toBe("SENT");
 
     const revision = await createRevisionFromCurrentVersion(proposal.id, actor.id);
 

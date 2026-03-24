@@ -86,4 +86,36 @@ describe("ProposalEditor", () => {
     expect(screen.getByRole("button", { name: /adicionar ambiente/i })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: /adicionar item/i })).toHaveLength(2);
   });
+
+  it("shows the purchase-order prompt after approval", () => {
+    render(
+      <ProposalEditor
+        proposal={{
+          id: "proposal-2",
+          number: "PROP-2026-002",
+          versionLabel: "PROP-2026-002",
+          versionStatus: "LOCKED",
+          title: "Projeto aprovado",
+          customerName: "Cliente aprovado",
+          status: "APPROVED",
+          total: 1000,
+          maxFinalPriceAdjustment: 10,
+          currentVersionId: "version-2",
+          sections: []
+        }}
+        catalogItems={[]}
+        addSectionAction="/propostas/ambientes"
+        addItemAction="/propostas/itens"
+        sendVersionAction="/propostas/enviar"
+        createRevisionAction="/propostas/revisoes"
+        approveAction="/propostas/aprovar"
+        loseAction="/propostas/perder"
+        showPurchaseOrderPrompt
+      />
+    );
+
+    expect(
+      screen.getByText(/deseja iniciar um pedido de compra para o fornecedor/i)
+    ).toBeInTheDocument();
+  });
 });
