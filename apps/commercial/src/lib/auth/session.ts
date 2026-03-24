@@ -9,6 +9,7 @@ export type CommercialSessionUser = {
   profileSlug: string;
   maxFinalPriceAdjustment: number;
   canManageCatalog: boolean;
+  canManageProposals: boolean;
 };
 
 export type CommercialSessionData = {

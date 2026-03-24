@@ -6,6 +6,17 @@ import {
   buildSentVersionSnapshot,
   createRevisionDraftFromVersion
 } from "./proposal-versioning";
+import {
+  type ProposalCatalogOption,
+  type ProposalEditorItemType,
+  type ProposalEditorViewModel,
+  type ProposalSummaryViewModel
+} from "./proposal-editor.types";
+import { buildProposalNumber } from "./proposal-numbering";
+import {
+  proposalStatusSchema,
+  proposalVersionStatusSchema
+} from "./proposal.schemas";
 
 type CreateDraftProposalInput = {
   number: string;
@@ -428,4 +439,203 @@ export async function markProposalAsLost(
   });
 
   return proposal;
+}
+
+export async function buildNextProposalNumber(referenceDate = new Date()) {
+  const year = referenceDate.getFullYear();
+  const currentYearPrefix = `PROP-${year}-`;
+  const currentCount = await db.proposal.count({
+    where: {
+      number: {
+        startsWith: currentYearPrefix
+      }
+    }
+  });
+
+  return buildProposalNumber(year, currentCount + 1);
+}
+
+function calculateVersionTotal(
+  sections: Array<{
+    id: string;
+    title: string;
+    items: Array<{
+      quantity: number;
+      unitPrice: number;
+      discountPercent: number;
+    }>;
+  }>
+) {
+  return calculateProposalTotals(sections).total;
+}
+
+function mapItemType(type?: string | null): ProposalEditorItemType {
+  if (type === "PRODUCT" || type === "SERVICE") {
+    return type;
+  }
+
+  return "MANUAL";
+}
+
+export async function listProposalSummaries(): Promise<ProposalSummaryViewModel[]> {
+  const proposals = await db.proposal.findMany({
+    orderBy: {
+      updatedAt: "desc"
+    },
+    include: {
+      versions: {
+        orderBy: {
+          revisionNumber: "desc"
+        },
+        include: {
+          sections: {
+            orderBy: {
+              position: "asc"
+            },
+            include: {
+              items: {
+                orderBy: {
+                  position: "asc"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return proposals.map((proposal) => {
+    const currentVersion =
+      proposal.versions.find(
+        (version) => version.revisionNumber === proposal.currentRevision
+      ) ?? proposal.versions[0];
+
+    const total = currentVersion
+      ? calculateVersionTotal(
+          currentVersion.sections.map((section) => ({
+            id: section.id,
+            title: section.title,
+            items: section.items.map((item) => ({
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              discountPercent: item.discountPercent
+            }))
+          }))
+        )
+      : 0;
+
+    return {
+      id: proposal.id,
+      number: proposal.number,
+      versionLabel: currentVersion?.label ?? proposal.number,
+      title: proposal.title,
+      customerName: proposal.customerName,
+      status: proposalStatusSchema.parse(proposal.status),
+      total,
+      updatedAt: proposal.updatedAt
+    };
+  });
+}
+
+export async function getProposalEditorData(
+  proposalId: string,
+  maxFinalPriceAdjustment: number
+): Promise<ProposalEditorViewModel> {
+  const proposal = await db.proposal.findUnique({
+    where: { id: proposalId }
+  });
+
+  if (!proposal) {
+    throw new Error("Proposta nao encontrada.");
+  }
+
+  const currentVersion = await db.proposalVersion.findFirst({
+    where: {
+      proposalId,
+      revisionNumber: proposal.currentRevision
+    },
+    include: {
+      sections: {
+        orderBy: {
+          position: "asc"
+        },
+        include: {
+          items: {
+            orderBy: {
+              position: "asc"
+            },
+            include: {
+              commercialItem: true
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (!currentVersion) {
+    throw new Error("Versao atual da proposta nao encontrada.");
+  }
+
+  const total = calculateVersionTotal(
+    currentVersion.sections.map((section) => ({
+      id: section.id,
+      title: section.title,
+      items: section.items.map((item) => ({
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        discountPercent: item.discountPercent
+      }))
+    }))
+  );
+
+  return {
+    id: proposal.id,
+    number: proposal.number,
+    versionLabel: currentVersion.label,
+    versionStatus: proposalVersionStatusSchema.parse(currentVersion.status),
+    title: proposal.title,
+    customerName: proposal.customerName,
+    customerEmail: proposal.customerEmail,
+    status: proposalStatusSchema.parse(proposal.status),
+    total,
+    maxFinalPriceAdjustment,
+    currentVersionId: currentVersion.id,
+    sections: currentVersion.sections.map((section) => ({
+      id: section.id,
+      title: section.title,
+      description: section.description,
+      items: section.items.map((item) => ({
+        id: item.id,
+        type: mapItemType(item.commercialItem?.type),
+        name: item.name,
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        discountPercent: item.discountPercent,
+        referencePrice: item.commercialItem?.referencePrice ?? item.unitPrice
+      }))
+    }))
+  };
+}
+
+export async function listProposalCatalogOptions(): Promise<ProposalCatalogOption[]> {
+  const items = await db.commercialItem.findMany({
+    where: {
+      active: true
+    },
+    orderBy: {
+      name: "asc"
+    }
+  });
+
+  return items
+    .filter((item) => item.type === "PRODUCT" || item.type === "SERVICE")
+    .map((item) => ({
+      id: item.id,
+      name: item.name,
+      type: item.type as "PRODUCT" | "SERVICE",
+      referencePrice: item.referencePrice
+    }));
 }
