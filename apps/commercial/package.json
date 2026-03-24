@@ -6,12 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "test": "vitest run",
-    "lint": "eslint . --max-warnings=0"
+    "lint": "eslint . --max-warnings=0",
+    "db:prepare": "node -e \"const fs=require('fs'); fs.mkdirSync('prisma',{recursive:true}); fs.closeSync(fs.openSync('prisma/dev.db','a'));\"",
+    "postinstall": "npm run db:prepare"
   },
   "dependencies": {
-    "@prisma/adapter-better-sqlite3": "^7.5.0",
-    "@prisma/client": "^7.5.0",
-    "better-sqlite3": "^12.4.6",
+    "@prisma/client": "^5.22.0",
     "next": "^15.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -26,9 +26,12 @@
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.0.0",
     "jsdom": "^25.0.0",
-    "prisma": "^7.5.0",
+    "prisma": "^5.22.0",
     "tsx": "^4.21.0",
     "typescript": "^5.0.0",
     "vitest": "^2.0.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

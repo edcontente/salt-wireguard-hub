@@ -1,13 +1,6 @@
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "@prisma/client";
 
-const databaseUrl = `file:${process.cwd()}/dev.db`;
-
-const prisma = new PrismaClient({
-  adapter: new PrismaBetterSqlite3({
-    url: databaseUrl
-  })
-});
+const prisma = new PrismaClient();
 
 async function main() {
   const adminProfile = await prisma.commercialProfile.upsert({
@@ -31,7 +24,7 @@ async function main() {
     }
   });
 
-  const sellerProfile = await prisma.commercialProfile.upsert({
+  await prisma.commercialProfile.upsert({
     where: { slug: "vendedor" },
     update: {
       name: "Vendedor",

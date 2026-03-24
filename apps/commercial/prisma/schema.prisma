@@ -4,49 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-}
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-}
-
-enum CommercialItemType {
-  PRODUCT
-  SERVICE
-}
-
-enum ProposalStatus {
-  DRAFT
-  SENT
-  APPROVED
-  REJECTED
-  ARCHIVED
-}
-
-enum ProposalVersionStatus {
-  DRAFT
-  PUBLISHED
-  LOCKED
-}
-
-enum ProposalAuditAction {
-  CREATED
-  UPDATED
-  VERSION_PUBLISHED
-  PUBLIC_LINK_CREATED
-  PUBLIC_LINK_REVOKED
-}
-
-model User {
-  id           String     @id @default(cuid())
-  name         String
-  email        String     @unique
-  passwordHash String
-  status       UserStatus @default(ACTIVE)
-  profileId    String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  url      = env("DATABASE_URL")
 }
 
 model CommercialProfile {
@@ -60,6 +18,25 @@ model CommercialProfile {
   isSystem                Boolean  @default(false)
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
+  users                   User[]   @relation("CommercialProfileUsers")
+}
+
+model User {
+  id                      String             @id @default(cuid())
+  name                    String
+  email                   String             @unique
+  passwordHash            String
+  status                  String             @default("ACTIVE")
+  profileId               String
+  profile                 CommercialProfile  @relation("CommercialProfileUsers", fields: [profileId], references: [id])
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  commercialItemsCreated  CommercialItem[]   @relation("CommercialItemCreatedBy")
+  commercialItemsUpdated  CommercialItem[]   @relation("CommercialItemUpdatedBy")
+  proposalsCreated        Proposal[]         @relation("ProposalCreatedBy")
+  proposalsUpdated        Proposal[]         @relation("ProposalUpdatedBy")
+  proposalVersionsCreated ProposalVersion[]  @relation("ProposalVersionCreatedBy")
+  proposalAuditLogs       ProposalAuditLog[] @relation("ProposalAuditLogUser")
 }
 
 model CommercialItem {
@@ -68,13 +45,16 @@ model CommercialItem {
   name          String
   description   String?
   category      String
-  type          CommercialItemType
+  type          String
   unitPrice     Float
   active        Boolean            @default(true)
   createdById   String
   updatedById   String
+  createdBy     User               @relation("CommercialItemCreatedBy", fields: [createdById], references: [id])
+  updatedBy     User               @relation("CommercialItemUpdatedBy", fields: [updatedById], references: [id])
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
+  proposalItems ProposalItem[]
 }
 
 model Proposal {
@@ -83,12 +63,16 @@ model Proposal {
   title           String
   customerName    String
   customerEmail   String?
-  status          ProposalStatus     @default(DRAFT)
+  status          String             @default("DRAFT")
   currentRevision Int                @default(1)
   createdById     String
   updatedById     String
+  createdBy       User               @relation("ProposalCreatedBy", fields: [createdById], references: [id])
+  updatedBy       User               @relation("ProposalUpdatedBy", fields: [updatedById], references: [id])
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
+  versions        ProposalVersion[]
+  auditLogs       ProposalAuditLog[]
 }
 
 model ProposalVersion {
@@ -96,9 +80,14 @@ model ProposalVersion {
   proposalId     String
   revisionNumber Int
   label          String
-  status         ProposalVersionStatus @default(DRAFT)
+  status         String                @default("DRAFT")
   notes          String?
   createdById    String
+  proposal       Proposal              @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  createdBy      User                  @relation("ProposalVersionCreatedBy", fields: [createdById], references: [id])
+  sections       ProposalSection[]
+  publicLinks    ProposalPublicLink[]
+  auditLogs      ProposalAuditLog[]
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
 
@@ -111,6 +100,8 @@ model ProposalSection {
   title             String
   description       String?
   position          Int
+  proposalVersion   ProposalVersion @relation(fields: [proposalVersionId], references: [id], onDelete: Cascade)
+  items             ProposalItem[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
@@ -127,6 +118,8 @@ model ProposalItem {
   unitPrice         Float
   discountPercent   Float           @default(0)
   position          Int
+  proposalSection   ProposalSection @relation(fields: [proposalSectionId], references: [id], onDelete: Cascade)
+  commercialItem    CommercialItem? @relation(fields: [commercialItemId], references: [id], onDelete: SetNull)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
@@ -140,6 +133,7 @@ model ProposalPublicLink {
   expiresAt         DateTime?
   revokedAt         DateTime?
   accessCount       Int             @default(0)
+  proposalVersion   ProposalVersion @relation(fields: [proposalVersionId], references: [id], onDelete: Cascade)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 }
@@ -149,8 +143,11 @@ model ProposalAuditLog {
   proposalId        String
   proposalVersionId String?
   userId            String?
-  action            ProposalAuditAction
+  action            String
   message           String
   details           String?
+  proposal          Proposal            @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  proposalVersion   ProposalVersion?    @relation(fields: [proposalVersionId], references: [id], onDelete: SetNull)
+  user              User?               @relation("ProposalAuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
   createdAt         DateTime            @default(now())
 }
