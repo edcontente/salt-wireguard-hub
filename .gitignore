@@ -15,12 +15,14 @@ arcam_st60.fixed.xml
 # Local secrets / environment overrides
 .env
 .env.*
+!apps/commercial/.env.example
 *.local
 *.local.json
 *.secret
 
 # Node / logs
 node_modules/
+**/.next/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
