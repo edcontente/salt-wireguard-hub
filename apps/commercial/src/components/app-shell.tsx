@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 const menuItems = [
@@ -18,9 +19,9 @@ export function AppShell({ children }: AppShellProps) {
         <h1 className="app-shell__title">Comercial</h1>
         <nav aria-label="Menu lateral" className="app-shell__nav">
           {menuItems.map((item) => (
-            <a key={item.label} href={item.href} className="app-shell__link">
+            <Link key={item.label} href={item.href} className="app-shell__link">
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
       </aside>

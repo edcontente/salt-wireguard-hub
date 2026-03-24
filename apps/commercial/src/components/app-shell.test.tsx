@@ -30,7 +30,7 @@ describe("AppShell", () => {
       </AppShell>
     );
 
-    expect(screen.getByRole("link", { name: "Catalogo" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Propostas" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Catalogo" })).toHaveAttribute("href", "/catalogo");
+    expect(screen.getByRole("link", { name: "Propostas" })).toHaveAttribute("href", "/propostas");
   });
 });
