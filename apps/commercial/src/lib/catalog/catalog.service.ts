@@ -19,26 +19,28 @@ export async function createCatalogItem(
   });
 }
 
-export async function searchCatalogItems(query?: string) {
-  const trimmedQuery = query?.trim();
+export async function searchCatalogItems(filters?: {
+  query?: string;
+  type?: string;
+  category?: string;
+}) {
+  const trimmedQuery = filters?.query?.trim();
 
   return db.commercialItem.findMany({
-    where: trimmedQuery
-      ? {
-          OR: [
-            {
-              name: {
-                contains: trimmedQuery
-              }
-            },
-            {
-              sku: {
-                contains: trimmedQuery
-              }
+    where: {
+      AND: [
+        trimmedQuery
+          ? {
+              OR: [
+                { name: { contains: trimmedQuery } },
+                { sku: { contains: trimmedQuery } }
+              ]
             }
-          ]
-        }
-      : undefined,
+          : {},
+        filters?.type ? { type: filters.type } : {},
+        filters?.category ? { category: filters.category } : {}
+      ]
+    },
     orderBy: {
       name: "asc"
     }

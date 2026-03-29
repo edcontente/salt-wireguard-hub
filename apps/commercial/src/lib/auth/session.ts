@@ -10,6 +10,7 @@ export type CommercialSessionUser = {
   maxFinalPriceAdjustment: number;
   canManageCatalog: boolean;
   canManageProposals: boolean;
+  canManageUsers: boolean;
 };
 
 export type CommercialSessionData = {

@@ -12,6 +12,8 @@ import {
   loseProposalAction,
   sendProposalVersionAction
 } from "./actions";
+import { listGlobalSystems } from "@/lib/systems/system.service";
+import { getStandardEnvironments } from "@/lib/environments/environment.service";
 
 type ProposalPageProps = {
   params: Promise<{
@@ -37,6 +39,9 @@ export default async function ProposalPage({
     user.maxFinalPriceAdjustment
   );
   const catalogItems = await listProposalCatalogOptions();
+  const globalSystems = await listGlobalSystems();
+  const globalEnvironments = await getStandardEnvironments();
+  
   const errorParam =
     typeof resolvedSearchParams?.error === "string"
       ? decodeURIComponent(resolvedSearchParams.error)
@@ -47,6 +52,8 @@ export default async function ProposalPage({
     <ProposalEditor
       proposal={proposal}
       catalogItems={catalogItems}
+      globalSystems={globalSystems}
+      globalEnvironments={globalEnvironments}
       addSectionAction={addProposalSectionAction.bind(
         null,
         proposal.id,

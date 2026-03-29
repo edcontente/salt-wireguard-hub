@@ -10,13 +10,7 @@ export default async function InternalLayout({ children }: InternalLayoutProps) 
   const user = await requireCommercialSession();
 
   return (
-    <AppShell>
-      <header>
-        <p>{user.name}</p>
-        <form action="/api/logout" method="post">
-          <button type="submit">Sair</button>
-        </form>
-      </header>
+    <AppShell user={user}>
       {children}
     </AppShell>
   );

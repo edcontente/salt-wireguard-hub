@@ -12,4 +12,5 @@ export const db =
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = db;
+  console.log("💎 Prisma Models Loaded:", Object.keys(db).filter(k => !k.startsWith("_")));
 }
