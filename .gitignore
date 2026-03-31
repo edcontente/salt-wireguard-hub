@@ -30,5 +30,7 @@ pnpm-debug.log*
 
 # Misc temporary files
 *.pid
+*.log
+.horus.*
 *.tmp
 *.swp
